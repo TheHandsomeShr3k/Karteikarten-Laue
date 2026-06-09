@@ -1,11 +1,32 @@
-# Karteikarten — Versicherungsaufsichtsrecht
+# Karteikarten — DHBW Lern-WebApp
 
-Interaktive Lern-WebApp zum Versicherungsaufsichtsrecht & Versicherungsvertrieb (DHBW, BWL Versicherung). Reines HTML/CSS/JS — **kein Build, kein Server**. Optimiert für iPhone & iPad.
+Interaktive Lern-WebApp mit mehreren Fächern (DHBW, BWL Versicherung). Reines HTML/CSS/JS — **kein Build, kein Server**. Optimiert für iPhone & iPad.
 
-## Zwei Stapel
+## Fächer
 
-- **Karteikarten** — 91 Karten, gefiltert nach 10 Themenblöcken (C.1–C.10)
-- **Prüfungsfragen** — 16 Klausuraufgaben (Teil D)
+Tippe oben auf den Fachtitel (▾), um das Fach zu wechseln (Tastatur: `F`). Jedes Fach hat einen **eigenen Lernstand**.
+
+- **§ Versicherungsaufsichtsrecht** — 91 Karten in 10 Themenblöcken (C.1–C.10) + 16 Prüfungsfragen (Teil D)
+- **σ Risikomanagement & Rückversicherung (Mattejat)** — 180 Karten in 19 Blöcken (Grundlagen → ART & Cat Bonds) + die große **Klausuraufgabe** (Quote + Summenexzedent + XL-Programm) als geführte Rechenkette in 12 Schritten
+
+## Zwei Stapel je Fach
+
+- **Karteikarten** — gefiltert nach Themenblöcken
+- **Prüfungsfragen / Klausuraufgabe** — Klausurteil des Fachs
+
+### Spezialfilter (Risikomanagement)
+
+Unter den Themenblöcken gibt es zusätzliche Filter-Chips, kombinierbar mit den Blöcken:
+
+- **🎯 Klausurrelevant** — vom Dozenten explizit markierte Inhalte
+- **🧮 Rechenkarten** — Formel + Rechenweg + Interpretation
+- **⚠️ Hinweise** — Stellen, an denen die Original-Unterlage unstimmig ist
+
+## Als App installieren (PWA)
+
+Die Seite ist eine **Progressive Web App**: In Safari **Teilen → Zum Home-Bildschirm** (iPhone/iPad) bzw. in Chrome/Edge **Installieren**. Danach startet sie wie eine native App (eigenes Icon, Vollbild) und funktioniert **komplett offline** — ein Service Worker hält alle Dateien und Schriften im Cache.
+
+> Beim Veröffentlichen von Inhalts-Updates die `VERSION` in `sw.js` hochzählen, damit installierte Apps den neuen Stand laden.
 
 ## Zwei Modi
 
@@ -29,13 +50,36 @@ Jede Karte wird einzeln terminiert. Nach dem Aufdecken bewertest du mit vier But
 - **Nichts fällig?** Dann erscheint ein **Countdown** bis zur nächsten fälligen Karte plus **„Vorziehen“**, um trotzdem vorab zu lernen. Läuft der Countdown ab, wird die fällige Karte automatisch geladen.
 - Ein kleiner Chip auf der Karte zeigt den Status: **Neu**, **Fällig** oder das aktuelle **Intervall**.
 
-Der Lernstand wird je Stapel lokal im Browser gespeichert (`localStorage`).
+Der Lernstand wird je **Fach und Stapel** lokal im Browser gespeichert (`localStorage`); bestehende Lernstände aus der Ein-Fach-Version werden beim ersten Start automatisch übernommen.
+
+## Suche
+
+Lupe oben rechts (oder `/`): durchsucht Frage **und** Antwort des aktuellen Stapels, kombinierbar mit Block- und Spezialfiltern. Während der Suche werden alle Treffer gezeigt (auch nicht fällige).
+
+## Merken & Ausblenden
+
+Jede Karte hat oben zwei Aktionen:
+
+- **★ Merken** — markiert die Karte für eine eigene Übungsauswahl. Sobald etwas gemerkt ist, erscheint in der Filterzeile der Chip **„★ Gemerkt"**: antippen und du übst nur deine markierten Karten (kombinierbar mit Blöcken und Spezialfiltern).
+- **⊘ Ausblenden** — nimmt die Karte komplett aus dem Lernbetrieb (kein Vorschlag mehr, zählt nicht als fällig). Über den Chip **„⊘ Ausgeblendet"** siehst du alle ausgeblendeten Karten und kannst sie per erneutem Tipp auf ⊘ reaktivieren. Die Suche findet ausgeblendete Karten weiterhin.
+
+Beide Markierungen werden je Fach und Stapel gespeichert und sind in der Export-Datei enthalten.
+
+## Statistik, Sicherung & Rückgängig
+
+Das Balken-Symbol oben rechts öffnet das Panel **Statistik & Daten**:
+
+- **Lernstand** des Fachs (gesamt / neu / fällig / geplant, je Stapel)
+- **Fällig in den nächsten 7 Tagen** und **Aktivität** der letzten 7 Tage inkl. **Lern-Serie** 🔥
+- **Export/Import**: Der Lernstand liegt nur im Browser (`localStorage`). Die Export-Datei (JSON) enthält Planung, ★/⊘-Markierungen, Prüfungs-Antworten und Aktivität **aller Fächer** — damit ziehst du z. B. vom iPhone aufs iPad um.
+
+**↶ Rückgängig** (oder `Z`) nimmt die letzte Bewertung zurück — falls man sich vertippt hat.
 
 ## Bedienung
 
 - **Nur fällige / Alle Karten** umschalten · **Mischen** · **Zurücksetzen** (setzt die Planung des aktuellen Stapels zurück)
 - **Wischen** links/rechts zum Blättern (Touch)
-- Tastatur: `Leertaste` aufdecken · `← →` blättern · `1` Nochmal · `2` Schwer · `3` Gut · `4` Einfach · `S` Mischen · `T` Design
+- Tastatur: `Leertaste` aufdecken · `← →` blättern · `1`–`4` bewerten · `Z` rückgängig · `/` suchen · `S` Mischen · `T` Design · `F` Fach wechseln
 - Drei Designs per Tipp auf das Symbol oben rechts: **Hell → Dunkel → OLED**
 
 ### OLED-Darkmode
@@ -44,21 +88,24 @@ Eigenes Design mit **echtem Schwarz (#000)** für Seite und Karten, damit die Pi
 
 ## Dateien
 
-`index.html` · `styles.css` · `app.js` · `cards.js` (Inhalt aus der Lernunterlage)
+`index.html` · `styles.css` · `app.js` · `subjects.js` (Fächer-Manifest) · `cards.js` (Aufsichtsrecht) · `cards-risiko.js` (Risikomanagement) · `manifest.webmanifest` + `sw.js` + `icons/` (PWA)
 
 ## Auf GitHub Pages veröffentlichen
 
 1. Repository anlegen (z. B. `versicherungsaufsicht-karten`).
-1. Die vier Dateien ins **Repo-Root** hochladen (`index.html` muss im Root liegen).
+1. Alle Dateien (inkl. `icons/`-Ordner) ins **Repo-Root** hochladen (`index.html` muss im Root liegen).
 1. **Settings → Pages → Source: „Deploy from a branch” → `main` / `/ (root)` → Save**.
 1. Nach ein paar Minuten: `https://<benutzername>.github.io/<repo>/`.
 
 Lokal testen: `index.html` einfach im Browser öffnen.
 
-## Inhalt ändern
+## Inhalt ändern / neues Fach hinzufügen
 
-`cards.js` enthält `FLASHCARDS` und `EXAMQS` als Listen `{ id, cat, label, q, a }`.
+Karten liegen als Listen `{ id, cat, label, q, a, tags? }` in `cards.js` bzw. `cards-risiko.js`.
 In `q`/`a` markiert `**Text**` Schlüsselbegriffe (Frage = Leuchtmarker, Antwort = fett).
+`tags` (optional) verknüpft eine Karte mit den Spezialfiltern des Fachs.
+
+**Neues Fach:** eine Datei `cards-<fach>.js` mit den Karten-Arrays anlegen, in `index.html` **vor** `subjects.js` einbinden und in `subjects.js` einen Eintrag in `SUBJECTS` ergänzen (Titel, Sigil, Blöcke mit Farben, Decks, optional Tag-Definitionen). Mehr ist nicht nötig — Menü, Filter und Lernstand kommen automatisch.
 
 ## Planungs-Parameter anpassen
 
