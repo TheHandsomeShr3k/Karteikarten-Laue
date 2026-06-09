@@ -158,10 +158,11 @@ body {
 .counter b { color: var(--ink); }
 
 /* ---------- Card ---------- */
-/* Karte + Bedienleiste als zentrierte Gruppe */
+/* Karte beginnt direkt unter den Filtern (kein vertikales Zentrieren mehr);
+   das Dock klebt via position:sticky am unteren Rand → Buttons immer erreichbar. */
 .board {
   flex: 1 1 auto; min-height: 0;
-  display: flex; flex-direction: column; justify-content: center;
+  display: flex; flex-direction: column; justify-content: flex-start;
   gap: 16px; padding: 6px 0;
 }
 .stage { perspective: 1600px; }
@@ -284,7 +285,12 @@ kbd {
 .done .row { justify-content: center; flex-wrap: wrap; }
 
 /* ---------- Dock (sticky bottom controls) ---------- */
-.dock { margin: 0; padding: 0; }
+.dock {
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 0 calc(-1 * clamp(14px, 4vw, 24px));
+  padding: 14px clamp(14px, 4vw, 24px) calc(env(safe-area-inset-bottom) + 10px);
+  background: linear-gradient(to top, var(--paper) 72%, transparent);
+}
 .dock-inner { width: 100%; max-width: var(--maxw); margin: 0 auto; display: grid; gap: 10px; }
 .row { display: flex; gap: 9px; }
 .row.center { justify-content: center; }

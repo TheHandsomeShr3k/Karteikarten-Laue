@@ -4,7 +4,7 @@
    offline aus dem Cache). Google Fonts: cache-first.
    Bei jeder inhaltlichen Änderung VERSION hochzählen!
    ========================================================= */
-var VERSION = "kk-cache-v6";
+var VERSION = "kk-cache-v7";
 var ASSETS = [
   "./", "./index.html", "./styles.css", "./app.js",
   "./subjects.js", "./cards.js", "./cards-risiko.js", "./cards-laue.js",
