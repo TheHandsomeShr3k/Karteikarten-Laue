@@ -2,27 +2,42 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
   <title>Karteikarten — Versicherungsaufsichtsrecht</title>
-  <meta name="description" content="Interaktive Karteikarten zum Versicherungsaufsichtsrecht & Versicherungsvertrieb — DHBW BWL Versicherung." />
+  <meta name="description" content="Interaktive Karteikarten & Prüfungsfragen zum Versicherungsaufsichtsrecht — DHBW BWL Versicherung." />
   <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#f1ece1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f141b" media="(prefers-color-scheme: dark)" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="wrap">
+  <main class="app">
     <header class="masthead">
       <div class="brand">
         <span class="sigil" aria-hidden="true">§</span>
         <div>
-          <h1>Versicherungsaufsichtsrecht — Karteikarten</h1>
-          <p>DHBW · BWL Versicherung · Finanzmarktregulierung</p>
+          <h1>Versicherungsaufsichtsrecht</h1>
+          <p>DHBW · BWL Versicherung · Lernkarten</p>
         </div>
       </div>
-      <button class="theme-toggle" id="theme" type="button" aria-label="Dunkles Design">☾</button>
+      <button class="icon-btn" id="theme" type="button" aria-label="Dunkles Design">☾</button>
     </header>
+
+    <div class="segs">
+      <div class="seg" id="deckSeg" role="group" aria-label="Stapel">
+        <button type="button" data-deck="cards" aria-pressed="true">Karteikarten</button>
+        <button type="button" data-deck="exam" aria-pressed="false">Prüfungsfragen</button>
+      </div>
+      <div class="seg" id="modeSeg" role="group" aria-label="Modus">
+        <button type="button" data-mode="learn" aria-pressed="true">Lernen</button>
+        <button type="button" data-mode="exam" aria-pressed="false">Prüfung</button>
+      </div>
+    </div>
 
     <nav class="filters" id="filters" aria-label="Themenblöcke"></nav>
 
@@ -31,30 +46,32 @@
       <span class="counter" id="counter"></span>
     </div>
 
+    <div class="tools">
+      <button class="btn ghost" id="shuffle" type="button">⤨ Mischen</button>
+      <button class="btn ghost" id="onlyUnknown" type="button" aria-pressed="false">Nur unbekannte</button>
+      <button class="btn ghost" id="reset" type="button">Zurücksetzen</button>
+    </div>
+
     <section class="stage" id="stage" aria-live="polite"></section>
 
-    <div class="controls">
-      <div class="row nav">
-        <button class="btn" id="prev" type="button" aria-label="Zurück">&larr; <span class="lbl">Zurück</span></button>
+    <p class="foot">
+      <b>Leertaste</b> aufdecken · <b>← →</b> blättern (oder wischen) · <b>1</b> Nochmal · <b>2</b> Gewusst · <b>S</b> Mischen
+    </p>
+  </main>
+
+  <div class="dock">
+    <div class="dock-inner">
+      <div class="row">
+        <button class="btn square" id="prev" type="button" aria-label="Zurück">←</button>
         <button class="btn primary grow" id="flip" type="button">Lösung zeigen</button>
-        <button class="btn" id="next" type="button" aria-label="Weiter"><span class="lbl">Weiter</span> &rarr;</button>
+        <button class="btn square" id="next" type="button" aria-label="Weiter">→</button>
       </div>
       <div class="row">
         <button class="btn again grow" id="again" type="button">↻ Nochmal</button>
         <button class="btn good grow" id="good" type="button">✓ Gewusst</button>
       </div>
-      <div class="utility">
-        <button class="btn ghost" id="shuffle" type="button">⤨ Mischen</button>
-        <button class="btn ghost" id="onlyUnknown" type="button" aria-pressed="false">Nur unbekannte</button>
-        <button class="btn ghost" id="reset" type="button">Fortschritt zurücksetzen</button>
-      </div>
     </div>
-
-    <p class="foot">
-      Tastatur: <b>Leertaste</b> aufdecken · <b>← / →</b> blättern · <b>1</b> Nochmal · <b>2</b> Gewusst · <b>S</b> Mischen · <b>T</b> Design.
-      Fortschritt wird lokal im Browser gespeichert.
-    </p>
-  </main>
+  </div>
 
   <script src="cards.js"></script>
   <script src="app.js"></script>
