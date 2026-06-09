@@ -168,12 +168,14 @@ body {
 .face {
   position: absolute; inset: 0;
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  -webkit-transform: translateZ(0); transform: translateZ(0);
 }
-.face.back { transform: rotateY(180deg); }
+.face.back { -webkit-transform: rotateY(180deg) translateZ(0); transform: rotateY(180deg) translateZ(0); }
 
 /* shared card surface */
 .surface {
   position: relative; height: 100%;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
   background: var(--card);
   border: 1.5px solid var(--hair);
   border-radius: var(--r);
