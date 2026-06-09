@@ -1,10 +1,11 @@
 /* =========================================================
-   Karteikarten-WebApp — Logik (Vanilla JS, kein Build nötig)
+   Karteikarten-WebApp — Logik (Vanilla JS, kein Build)
+   Decks: Karteikarten (C.1–C.10) + Prüfungsfragen (Teil D)
+   Modi:  Lernen (Flip) + Prüfung (eigene Antwort eintippen)
    ========================================================= */
 (function () {
   "use strict";
 
-  // ---- Kurzbezeichnungen & Farben je Themenblock ----
   var SHORT = {
     "C.1": "Grundlagen", "C.2": "Behörden & Quellen", "C.3": "Solvency II",
     "C.4": "Zulassung", "C.5": "Organisation", "C.6": "Laufende Aufsicht",
@@ -14,208 +15,261 @@
     "C.1": "#3f6fb0", "C.2": "#7a5bb0", "C.3": "#1f8a8a", "C.4": "#c0612e", "C.5": "#2e8b6b",
     "C.6": "#b0463f", "C.7": "#a8852a", "C.8": "#4f7d3a", "C.9": "#a14d86", "C.10": "#5b6b8c"
   };
+  var EXAM_COLOR = "#15233c";
 
-  // ---- LocalStorage (auf eigener Seite erlaubt; defensiv) ----
+  var DECKS = {
+    cards: { items: (typeof FLASHCARDS !== "undefined" ? FLASHCARDS : []), cats: true },
+    exam:  { items: (typeof EXAMQS !== "undefined" ? EXAMQS : []),       cats: false }
+  };
+
   var store = {
     get: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
 
   // ---- State ----
-  var known = new Set(store.get("kk-known", []));
+  var deckKey = store.get("kk-deck", "cards");
+  var mode = store.get("kk-mode", "learn");
+  if (!DECKS[deckKey]) deckKey = "cards";
   var filter = "all";
   var onlyUnknown = false;
-  var deck = [];
-  var idx = 0;
-  var flipped = false;
-  var finished = false;
+  var deck = [], idx = 0, revealed = false, finished = false;
+  var knownStore = {
+    cards: new Set(store.get("kk-known-cards", [])),
+    exam:  new Set(store.get("kk-known-exam", []))
+  };
+  var answers = store.get("kk-answers", {}); // {"deck:id": "text"}
 
   // ---- DOM ----
   var $ = function (s) { return document.querySelector(s); };
-  var filtersEl = $("#filters");
-  var stageEl = $("#stage");
-  var barEl = $("#bar");
-  var counterEl = $("#counter");
-  var prevBtn = $("#prev");
-  var flipBtn = $("#flip");
-  var nextBtn = $("#next");
-  var goodBtn = $("#good");
-  var againBtn = $("#again");
-  var shuffleBtn = $("#shuffle");
-  var unknownBtn = $("#onlyUnknown");
-  var resetBtn = $("#reset");
-  var themeBtn = $("#theme");
+  var filtersEl = $("#filters"), stageEl = $("#stage"), barEl = $("#bar"), counterEl = $("#counter");
+  var prevBtn = $("#prev"), flipBtn = $("#flip"), nextBtn = $("#next"), goodBtn = $("#good"), againBtn = $("#again");
+  var shuffleBtn = $("#shuffle"), unknownBtn = $("#onlyUnknown"), resetBtn = $("#reset"), themeBtn = $("#theme");
+  var deckSeg = $("#deckSeg"), modeSeg = $("#modeSeg");
 
   // ---- Helpers ----
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function fmt(s, tag) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<" + tag + ">$1</" + tag + ">"); }
-  function categories() {
+  function known() { return knownStore[deckKey]; }
+  function saveKnown() { store.set("kk-known-" + deckKey, Array.from(known())); }
+  function cats() {
     var seen = [], set = {};
-    FLASHCARDS.forEach(function (c) { if (!set[c.cat]) { set[c.cat] = 1; seen.push(c.cat); } });
+    DECKS.cards.items.forEach(function (c) { if (!set[c.cat]) { set[c.cat] = 1; seen.push(c.cat); } });
     return seen;
   }
-  function scope() { return FLASHCARDS.filter(function (c) { return filter === "all" || c.cat === filter; }); }
+  function scope() {
+    var items = DECKS[deckKey].items;
+    if (deckKey === "cards" && filter !== "all") return items.filter(function (c) { return c.cat === filter; });
+    return items.slice();
+  }
+  function colorFor(c) { return deckKey === "exam" ? EXAM_COLOR : (COLOR[c.cat] || EXAM_COLOR); }
+  function tagFor(c) { return deckKey === "exam" ? ("Prüfungsfrage " + c.id) : (c.cat + " · " + (SHORT[c.cat] || "")); }
+  function ansKey(c) { return deckKey + ":" + c.id; }
 
   function buildDeck(shuffle) {
-    deck = scope().filter(function (c) { return !onlyUnknown || !known.has(c.id); });
-    if (shuffle) {
-      for (var i = deck.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
-      }
-    }
-    idx = 0; flipped = false; finished = deck.length === 0;
+    deck = scope().filter(function (c) { return !onlyUnknown || !known().has(c.id); });
+    if (shuffle) for (var i = deck.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0; var t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
+    idx = 0; revealed = false; finished = deck.length === 0;
   }
 
-  // ---- Filter chips ----
+  // ---- Segmented controls + filters ----
+  function syncSegs() {
+    Array.prototype.forEach.call(deckSeg.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-deck") === deckKey)); });
+    Array.prototype.forEach.call(modeSeg.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === mode)); });
+  }
   function renderFilters() {
-    var cats = categories();
-    var html = '<button class="chip" data-f="all" aria-pressed="' + (filter === "all") + '">Alle <span class="n">' + FLASHCARDS.length + "</span></button>";
-    cats.forEach(function (cat) {
-      var n = FLASHCARDS.filter(function (c) { return c.cat === cat; }).length;
-      html += '<button class="chip" data-f="' + cat + '" title="' + esc(cat + " — " + (FLASHCARDS.find(function (c) { return c.cat === cat; }).label)) + '" aria-pressed="' + (filter === cat) + '" style="--cat:' + COLOR[cat] + '">' +
-        esc(SHORT[cat] || cat) + ' <span class="n">' + n + "</span></button>";
+    if (deckKey !== "cards") { filtersEl.style.display = "none"; filtersEl.innerHTML = ""; return; }
+    filtersEl.style.display = "";
+    var html = '<button class="chip" data-f="all" aria-pressed="' + (filter === "all") + '">Alle <span class="n">' + DECKS.cards.items.length + "</span></button>";
+    cats().forEach(function (cat) {
+      var n = DECKS.cards.items.filter(function (c) { return c.cat === cat; }).length;
+      var on = filter === cat;
+      var st = on ? ' style="background:' + COLOR[cat] + ';border-color:' + COLOR[cat] + ';color:#fff"' : "";
+      html += '<button class="chip" data-f="' + cat + '" aria-pressed="' + on + '"' + st + '>' + esc(SHORT[cat] || cat) + ' <span class="n">' + n + "</span></button>";
     });
     filtersEl.innerHTML = html;
     Array.prototype.forEach.call(filtersEl.querySelectorAll(".chip"), function (b) {
-      b.addEventListener("click", function () {
-        filter = b.getAttribute("data-f");
-        buildDeck(false); renderFilters(); render();
-      });
+      b.addEventListener("click", function () { filter = b.getAttribute("data-f"); buildDeck(false); renderFilters(); render(); });
     });
-    // aktiver Chip bekommt seine Themenfarbe als Rahmen
-    var active = filtersEl.querySelector('[data-f="' + filter + '"]');
-    if (active && filter !== "all") active.style.background = COLOR[filter], active.style.borderColor = COLOR[filter], active.style.color = "#fff";
   }
 
-  // ---- Progress ----
   function renderProgress() {
-    var sc = scope();
-    var done = sc.filter(function (c) { return known.has(c.id); }).length;
-    var pct = sc.length ? Math.round(done / sc.length * 100) : 0;
-    barEl.style.width = pct + "%";
-    if (finished) {
-      counterEl.innerHTML = "<b>" + done + "</b> / " + sc.length + " gewusst";
-    } else {
-      counterEl.innerHTML = "Karte <b>" + (idx + 1) + "</b> / " + deck.length + " &nbsp;·&nbsp; " + done + " gewusst";
-    }
+    var sc = scope(), done = sc.filter(function (c) { return known().has(c.id); }).length;
+    barEl.style.width = (sc.length ? Math.round(done / sc.length * 100) : 0) + "%";
+    counterEl.innerHTML = finished
+      ? "<b>" + done + "</b> / " + sc.length + " gewusst"
+      : "Karte <b>" + (idx + 1) + "</b> / " + deck.length + " · " + done + " gewusst";
   }
 
-  // ---- Card ----
+  // ---- Card rendering ----
   function render() {
+    syncSegs();
     renderProgress();
     if (finished) { renderDone(); syncButtons(); return; }
-    var c = deck[idx];
-    var tag = (c.cat + " · " + (SHORT[c.cat] || ""));
-    var isKnown = known.has(c.id);
+    mode === "exam" ? renderExam() : renderLearn();
+    syncButtons();
+  }
 
+  function renderLearn() {
+    var c = deck[idx], col = colorFor(c), isKnown = known().has(c.id);
     stageEl.innerHTML =
-      '<div class="card' + (flipped ? " flip" : "") + (isKnown ? " known" : "") + '" id="card" style="--cat:' + (COLOR[c.cat] || "#16243f") + '">' +
-        '<div class="face front">' +
-          '<div class="meta"><span class="tag">' + esc(tag) + '</span><span class="pos">#' + c.id + "</span></div>" +
-          '<span class="badge-known">✓ gewusst</span>' +
+      '<div class="flipcard' + (revealed ? " flip" : "") + (isKnown ? " known" : "") + '" id="card" style="--cat:' + col + '">' +
+        '<div class="face front"><div class="surface">' +
+          metaHTML(c) +
+          '<span class="badge">✓ gewusst</span>' +
           '<div class="role">Frage</div>' +
           '<div class="q">' + fmt(c.q, "mark") + "</div>" +
-          '<div class="hint">Tippen oder <kbd>Leertaste</kbd> &rarr; Lösung</div>' +
-        "</div>" +
-        '<div class="face back">' +
-          '<div class="meta"><span class="tag">' + esc(tag) + '</span><span class="pos">#' + c.id + "</span></div>" +
-          '<div class="role">Antwort</div>' +
+          '<div class="hint">Tippen oder <kbd>Leertaste</kbd> → Lösung</div>' +
+        "</div></div>" +
+        '<div class="face back"><div class="surface">' +
+          metaHTML(c) +
+          '<div class="role ans">' + (deckKey === "exam" ? "Musterlösung" : "Antwort") + "</div>" +
           '<div class="a">' + fmt(c.a, "strong") + "</div>" +
-          '<div class="hint"><kbd>2</kbd> Gewusst · <kbd>1</kbd> Nochmal · <kbd>&rarr;</kbd> Weiter</div>' +
-        "</div>" +
+          '<div class="hint"><kbd>2</kbd> Gewusst · <kbd>1</kbd> Nochmal · <kbd>→</kbd> Weiter</div>' +
+        "</div></div>" +
       "</div>";
-
     var card = $("#card");
-    card.addEventListener("click", flip);
+    card.addEventListener("click", function (e) { if (!e.target.closest("a")) flip(); });
     fit();
-    syncButtons();
+  }
+
+  function renderExam() {
+    var c = deck[idx], col = colorFor(c), isKnown = known().has(c.id);
+    var saved = answers[ansKey(c)] || "";
+    var body;
+    if (!revealed) {
+      body =
+        '<textarea class="exam-field" id="examField" placeholder="Deine Antwort hier eintippen … (Stichpunkte genügen)">' + esc(saved) + "</textarea>" +
+        '<div class="hint">Tippe deine Antwort, dann <b>Lösung vergleichen</b>.</div>';
+    } else {
+      body =
+        '<div class="reveal">' +
+          '<div class="block mine"><div class="lab">Deine Antwort</div><div class="txt">' +
+            (saved.trim() ? esc(saved) : "<em>(keine Antwort eingetippt)</em>") + "</div></div>" +
+          '<div class="block model"><div class="lab">Musterlösung</div><div class="txt">' + fmt(c.a, "strong") + "</div></div>" +
+          '<div class="hint"><kbd>2</kbd> Gewusst · <kbd>1</kbd> Nochmal · <kbd>→</kbd> Weiter</div>' +
+        "</div>";
+    }
+    stageEl.innerHTML =
+      '<div class="examcard surface' + (isKnown ? " known" : "") + '" id="card" style="--cat:' + col + '">' +
+        metaHTML(c) +
+        '<span class="badge">✓ gewusst</span>' +
+        '<div class="role">Prüfungsfrage</div>' +
+        '<div class="q">' + fmt(c.q, "mark") + "</div>" +
+        body +
+      "</div>";
+    var f = $("#examField");
+    if (f) { f.addEventListener("input", function () { answers[ansKey(c)] = f.value; }); }
+  }
+
+  function metaHTML(c) {
+    return '<div class="meta"><span class="tag">' + esc(tagFor(c)) + '</span><span class="pos">#' + c.id + "</span></div>";
   }
 
   function renderDone() {
-    var sc = scope();
-    var done = sc.filter(function (c) { return known.has(c.id); }).length;
-    var allKnown = done === sc.length && sc.length > 0;
+    var sc = scope(), done = sc.filter(function (c) { return known().has(c.id); }).length;
+    var all = done === sc.length && sc.length > 0;
     stageEl.innerHTML =
       '<div class="done">' +
-        "<h2>" + (allKnown ? "Stapel gemeistert 🎓" : "Durch!") + "</h2>" +
-        "<p>" + done + " von " + sc.length + " Karten als „gewusst" + '\u201C markiert' +
-          (filter === "all" ? "" : " im Block " + esc(filter)) + ".</p>" +
-        '<div class="row center" style="flex-wrap:wrap">' +
+        "<h2>" + (all ? "Stapel gemeistert 🎓" : "Durch!") + "</h2>" +
+        "<p>" + done + " von " + sc.length + " als „gewusst\u201C markiert.</p>" +
+        '<div class="row center">' +
           '<button class="btn primary" id="d-all">Alle wiederholen</button>' +
-          '<button class="btn again" id="d-unknown">Nur „Nochmal"-Karten</button>' +
-          '<button class="btn" id="d-shuffle">Mischen &amp; neu</button>' +
-        "</div>" +
-      "</div>";
-    $("#d-all").addEventListener("click", function () { onlyUnknown = false; unknownBtn.setAttribute("aria-pressed", "false"); buildDeck(false); render(); });
-    $("#d-unknown").addEventListener("click", function () { onlyUnknown = true; unknownBtn.setAttribute("aria-pressed", "true"); buildDeck(false); render(); });
-    $("#d-shuffle").addEventListener("click", function () { buildDeck(true); render(); });
+          '<button class="btn again" id="d-unknown">Nur „Nochmal\u201C</button>' +
+          '<button class="btn" id="d-shuffle">Mischen</button>' +
+        "</div></div>";
+    $("#d-all").addEventListener("click", function () { onlyUnknown = false; syncUnknownBtn(); buildDeck(false); render(); });
+    $("#d-unknown").addEventListener("click", function () { onlyUnknown = true; syncUnknownBtn(); buildDeck(false); render(); });
+    $("#d-shuffle").addEventListener("click", function () { onlyUnknown = false; syncUnknownBtn(); buildDeck(true); render(); });
   }
 
-  // Höhe an die größere Kartenseite anpassen (sauberes 3D-Flip)
   function fit() {
-    var card = $("#card");
-    if (!card) return;
-    var faces = card.querySelectorAll(".face");
+    var card = $("#card"); if (!card || !card.classList.contains("flipcard")) return;
     card.style.height = "0px";
     var h = 0;
-    Array.prototype.forEach.call(faces, function (f) { h = Math.max(h, f.scrollHeight); });
+    Array.prototype.forEach.call(card.querySelectorAll(".face"), function (f) { h = Math.max(h, f.firstChild.scrollHeight); });
     card.style.height = (h + 4) + "px";
   }
 
+  // ---- Actions ----
+  function saveField() {
+    var f = $("#examField"); if (f) answers[ansKey(deck[idx])] = f.value;
+  }
   function flip() {
     if (finished) return;
-    flipped = !flipped;
-    var card = $("#card");
-    if (card) card.classList.toggle("flip", flipped);
+    if (mode === "exam") {
+      saveField();
+      revealed = !revealed;
+      render();
+      store.set("kk-answers", answers);
+      return;
+    }
+    revealed = !revealed;
+    var card = $("#card"); if (card) card.classList.toggle("flip", revealed);
     syncButtons();
   }
-
   function grade(good) {
     if (finished) return;
+    saveField();
     var c = deck[idx];
-    if (good) known.add(c.id); else known.delete(c.id);
-    store.set("kk-known", Array.from(known));
+    if (good) known().add(c.id); else known().delete(c.id);
+    saveKnown();
     next();
   }
-
   function next() {
     if (finished) return;
-    if (idx < deck.length - 1) { idx++; flipped = false; render(); }
+    saveField(); store.set("kk-answers", answers);
+    if (idx < deck.length - 1) { idx++; revealed = false; render(); }
     else { finished = true; render(); }
   }
   function prev() {
-    if (finished) { finished = false; idx = Math.max(0, deck.length - 1); flipped = false; render(); return; }
-    if (idx > 0) { idx--; flipped = false; render(); }
+    if (finished) { finished = false; idx = Math.max(0, deck.length - 1); revealed = false; render(); return; }
+    saveField();
+    if (idx > 0) { idx--; revealed = false; render(); }
   }
-
+  function syncUnknownBtn() {
+    unknownBtn.setAttribute("aria-pressed", String(onlyUnknown));
+    unknownBtn.textContent = onlyUnknown ? "Alle Karten" : "Nur unbekannte";
+  }
   function syncButtons() {
     prevBtn.disabled = !finished && idx === 0;
     nextBtn.disabled = finished;
     flipBtn.disabled = finished;
     goodBtn.disabled = finished;
     againBtn.disabled = finished;
-    flipBtn.textContent = flipped ? "Frage zeigen" : "Lösung zeigen";
+    flipBtn.textContent = mode === "exam"
+      ? (revealed ? "Antwort ausblenden" : "Lösung vergleichen")
+      : (revealed ? "Frage zeigen" : "Lösung zeigen");
   }
 
-  // ---- Controls ----
+  // ---- Events ----
   prevBtn.addEventListener("click", prev);
   nextBtn.addEventListener("click", next);
   flipBtn.addEventListener("click", flip);
   goodBtn.addEventListener("click", function () { grade(true); });
   againBtn.addEventListener("click", function () { grade(false); });
-  shuffleBtn.addEventListener("click", function () { buildDeck(true); render(); });
-  unknownBtn.addEventListener("click", function () {
-    onlyUnknown = !onlyUnknown;
-    unknownBtn.setAttribute("aria-pressed", String(onlyUnknown));
-    unknownBtn.textContent = onlyUnknown ? "Alle Karten" : "Nur unbekannte";
-    buildDeck(false); render();
-  });
+  shuffleBtn.addEventListener("click", function () { saveField(); buildDeck(true); render(); });
+  unknownBtn.addEventListener("click", function () { saveField(); onlyUnknown = !onlyUnknown; syncUnknownBtn(); buildDeck(false); render(); });
   resetBtn.addEventListener("click", function () {
-    if (!confirm("Lernfortschritt zurücksetzen? Alle „gewusst\u201C-Markierungen werden gelöscht.")) return;
-    known = new Set(); store.set("kk-known", []);
-    onlyUnknown = false; unknownBtn.setAttribute("aria-pressed", "false"); unknownBtn.textContent = "Nur unbekannte";
-    buildDeck(false); renderFilters(); render();
+    if (!confirm("Fortschritt dieses Stapels zurücksetzen?")) return;
+    knownStore[deckKey] = new Set(); saveKnown();
+    onlyUnknown = false; syncUnknownBtn(); buildDeck(false); renderFilters(); render();
+  });
+
+  Array.prototype.forEach.call(deckSeg.children, function (b) {
+    b.addEventListener("click", function () {
+      saveField();
+      deckKey = b.getAttribute("data-deck"); store.set("kk-deck", deckKey);
+      filter = "all"; onlyUnknown = false; syncUnknownBtn();
+      buildDeck(false); renderFilters(); render();
+    });
+  });
+  Array.prototype.forEach.call(modeSeg.children, function (b) {
+    b.addEventListener("click", function () {
+      saveField();
+      mode = b.getAttribute("data-mode"); store.set("kk-mode", mode);
+      revealed = false; render();
+    });
   });
 
   // ---- Theme ----
@@ -232,23 +286,38 @@
 
   // ---- Keyboard ----
   document.addEventListener("keydown", function (e) {
-    if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ""))) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
     var k = e.key;
     if (k === " " || k === "Enter") { e.preventDefault(); flip(); }
     else if (k === "ArrowRight") { e.preventDefault(); next(); }
     else if (k === "ArrowLeft") { e.preventDefault(); prev(); }
-    else if (k === "1") { grade(false); }
-    else if (k === "2") { grade(true); }
+    else if (k === "1") grade(false);
+    else if (k === "2") grade(true);
     else if (k.toLowerCase() === "s") { buildDeck(true); render(); }
-    else if (k.toLowerCase() === "t") { themeBtn.click(); }
+    else if (k.toLowerCase() === "t") themeBtn.click();
   });
 
-  var rt;
-  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(fit, 120); });
+  // ---- Swipe (Touch) ----
+  var tsx = 0, tsy = 0, tracking = false;
+  stageEl.addEventListener("touchstart", function (e) {
+    if (e.target.closest("textarea")) { tracking = false; return; }
+    var t = e.changedTouches[0]; tsx = t.clientX; tsy = t.clientY; tracking = true;
+  }, { passive: true });
+  stageEl.addEventListener("touchend", function (e) {
+    if (!tracking) return; tracking = false;
+    var t = e.changedTouches[0], dx = t.clientX - tsx, dy = t.clientY - tsy;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6) { dx < 0 ? next() : prev(); }
+  }, { passive: true });
+
+  // ---- Resize ----
+  var rt; function onResize() { clearTimeout(rt); rt = setTimeout(fit, 120); }
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", function () { setTimeout(fit, 250); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 
   // ---- Init ----
   applyTheme(store.get("kk-theme", (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light"));
+  syncUnknownBtn();
   buildDeck(false);
   renderFilters();
   render();
