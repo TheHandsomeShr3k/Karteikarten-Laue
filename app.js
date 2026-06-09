@@ -1,7 +1,7 @@
 /* =========================================================
    Karteikarten-WebApp — Logik (Vanilla JS, kein Build)
    Decks: Karteikarten (C.1–C.10) + Prüfungsfragen (Teil D)
-   Modi:  Lernen (Flip) + Prüfung (eigene Antwort eintippen)
+   Modi:  Lernen (Halb-Flip, iPad-sicher) + Prüfung (eigene Antwort)
    ========================================================= */
 (function () {
   "use strict";
@@ -33,12 +33,12 @@
   if (!DECKS[deckKey]) deckKey = "cards";
   var filter = "all";
   var onlyUnknown = false;
-  var deck = [], idx = 0, revealed = false, finished = false;
+  var deck = [], idx = 0, revealed = false, finished = false, animating = false;
   var knownStore = {
     cards: new Set(store.get("kk-known-cards", [])),
     exam:  new Set(store.get("kk-known-exam", []))
   };
-  var answers = store.get("kk-answers", {}); // {"deck:id": "text"}
+  var answers = store.get("kk-answers", {});
 
   // ---- DOM ----
   var $ = function (s) { return document.querySelector(s); };
@@ -46,6 +46,7 @@
   var prevBtn = $("#prev"), flipBtn = $("#flip"), nextBtn = $("#next"), goodBtn = $("#good"), againBtn = $("#again");
   var shuffleBtn = $("#shuffle"), unknownBtn = $("#onlyUnknown"), resetBtn = $("#reset"), themeBtn = $("#theme");
   var deckSeg = $("#deckSeg"), modeSeg = $("#modeSeg");
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---- Helpers ----
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
@@ -65,11 +66,14 @@
   function colorFor(c) { return deckKey === "exam" ? EXAM_COLOR : (COLOR[c.cat] || EXAM_COLOR); }
   function tagFor(c) { return deckKey === "exam" ? ("Prüfungsfrage " + c.id) : (c.cat + " · " + (SHORT[c.cat] || "")); }
   function ansKey(c) { return deckKey + ":" + c.id; }
+  function metaHTML(c) {
+    return '<div class="meta"><span class="tag">' + esc(tagFor(c)) + '</span><span class="pos">#' + c.id + "</span></div>";
+  }
 
   function buildDeck(shuffle) {
     deck = scope().filter(function (c) { return !onlyUnknown || !known().has(c.id); });
     if (shuffle) for (var i = deck.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0; var t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
-    idx = 0; revealed = false; finished = deck.length === 0;
+    idx = 0; revealed = false; finished = deck.length === 0; animating = false;
   }
 
   // ---- Segmented controls + filters ----
@@ -101,8 +105,27 @@
       : "Karte <b>" + (idx + 1) + "</b> / " + deck.length + " · " + done + " gewusst";
   }
 
-  // ---- Card rendering ----
+  // ---- Card content (single surface) ----
+  function surfaceHTML(c, showAnswer) {
+    if (!showAnswer) {
+      return '<div class="surface">' +
+        metaHTML(c) +
+        '<span class="badge">✓ gewusst</span>' +
+        '<div class="role">Frage</div>' +
+        '<div class="q">' + fmt(c.q, "mark") + "</div>" +
+        '<div class="hint">Tippen oder <kbd>Leertaste</kbd> → Lösung</div>' +
+      "</div>";
+    }
+    return '<div class="surface">' +
+      metaHTML(c) +
+      '<div class="role ans">' + (deckKey === "exam" ? "Musterlösung" : "Antwort") + "</div>" +
+      '<div class="a">' + fmt(c.a, "strong") + "</div>" +
+      '<div class="hint"><kbd>2</kbd> Gewusst · <kbd>1</kbd> Nochmal · <kbd>→</kbd> Weiter</div>' +
+    "</div>";
+  }
+
   function render() {
+    animating = false;
     syncSegs();
     renderProgress();
     if (finished) { renderDone(); syncButtons(); return; }
@@ -113,24 +136,10 @@
   function renderLearn() {
     var c = deck[idx], col = colorFor(c), isKnown = known().has(c.id);
     stageEl.innerHTML =
-      '<div class="flipcard' + (revealed ? " flip" : "") + (isKnown ? " known" : "") + '" id="card" style="--cat:' + col + '">' +
-        '<div class="face front"><div class="surface">' +
-          metaHTML(c) +
-          '<span class="badge">✓ gewusst</span>' +
-          '<div class="role">Frage</div>' +
-          '<div class="q">' + fmt(c.q, "mark") + "</div>" +
-          '<div class="hint">Tippen oder <kbd>Leertaste</kbd> → Lösung</div>' +
-        "</div></div>" +
-        '<div class="face back"><div class="surface">' +
-          metaHTML(c) +
-          '<div class="role ans">' + (deckKey === "exam" ? "Musterlösung" : "Antwort") + "</div>" +
-          '<div class="a">' + fmt(c.a, "strong") + "</div>" +
-          '<div class="hint"><kbd>2</kbd> Gewusst · <kbd>1</kbd> Nochmal · <kbd>→</kbd> Weiter</div>' +
-        "</div></div>" +
+      '<div class="flipcard' + (isKnown ? " known" : "") + '" id="card" style="--cat:' + col + '">' +
+        surfaceHTML(c, revealed) +
       "</div>";
-    var card = $("#card");
-    card.addEventListener("click", function (e) { if (!e.target.closest("a")) flip(); });
-    fit();
+    $("#card").addEventListener("click", function (e) { if (!e.target.closest("a")) flip(); });
   }
 
   function renderExam() {
@@ -159,11 +168,7 @@
         body +
       "</div>";
     var f = $("#examField");
-    if (f) { f.addEventListener("input", function () { answers[ansKey(c)] = f.value; }); }
-  }
-
-  function metaHTML(c) {
-    return '<div class="meta"><span class="tag">' + esc(tagFor(c)) + '</span><span class="pos">#' + c.id + "</span></div>";
+    if (f) f.addEventListener("input", function () { answers[ansKey(c)] = f.value; });
   }
 
   function renderDone() {
@@ -183,18 +188,7 @@
     $("#d-shuffle").addEventListener("click", function () { onlyUnknown = false; syncUnknownBtn(); buildDeck(true); render(); });
   }
 
-  function fit() {
-    var card = $("#card"); if (!card || !card.classList.contains("flipcard")) return;
-    card.style.height = "0px";
-    var h = 0;
-    Array.prototype.forEach.call(card.querySelectorAll(".face"), function (f) { h = Math.max(h, f.firstChild.scrollHeight); });
-    card.style.height = (h + 4) + "px";
-  }
-
-  // ---- Actions ----
-  function saveField() {
-    var f = $("#examField"); if (f) answers[ansKey(deck[idx])] = f.value;
-  }
+  // ---- Flip (Halb-Drehung, nur eine Fläche im DOM) ----
   function flip() {
     if (finished) return;
     if (mode === "exam") {
@@ -204,10 +198,27 @@
       store.set("kk-answers", answers);
       return;
     }
+    if (animating) return;
     revealed = !revealed;
-    var card = $("#card"); if (card) card.classList.toggle("flip", revealed);
-    syncButtons();
+    var card = $("#card");
+    if (!card) { render(); return; }
+    if (reduceMotion) { card.innerHTML = surfaceHTML(deck[idx], revealed); syncButtons(); return; }
+    animating = true;
+    card.style.transition = "transform .15s ease-in";
+    card.style.transform = "rotateY(90deg)";
+    setTimeout(function () {
+      card.innerHTML = surfaceHTML(deck[idx], revealed);
+      card.style.transition = "none";
+      card.style.transform = "rotateY(-90deg)";
+      void card.offsetWidth;          // reflow
+      card.style.transition = "transform .15s ease-out";
+      card.style.transform = "rotateY(0deg)";
+      syncButtons();
+      setTimeout(function () { animating = false; card.style.transition = ""; card.style.transform = ""; }, 170);
+    }, 150);
   }
+
+  function saveField() { var f = $("#examField"); if (f) answers[ansKey(deck[idx])] = f.value; }
   function grade(good) {
     if (finished) return;
     saveField();
@@ -281,7 +292,6 @@
   }
   themeBtn.addEventListener("click", function () {
     applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
-    fit();
   });
 
   // ---- Keyboard ----
@@ -308,12 +318,6 @@
     var t = e.changedTouches[0], dx = t.clientX - tsx, dy = t.clientY - tsy;
     if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6) { dx < 0 ? next() : prev(); }
   }, { passive: true });
-
-  // ---- Resize ----
-  var rt; function onResize() { clearTimeout(rt); rt = setTimeout(fit, 120); }
-  window.addEventListener("resize", onResize);
-  window.addEventListener("orientationchange", function () { setTimeout(fit, 250); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 
   // ---- Init ----
   applyTheme(store.get("kk-theme", (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light"));

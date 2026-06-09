@@ -155,27 +155,19 @@ body {
 .counter b { color: var(--ink); }
 
 /* ---------- Card ---------- */
-.stage { perspective: 1800px; min-height: 230px; }
+.stage { perspective: 1600px; min-height: 230px; }
 
-/* learn-mode flip card */
+/* learn-mode card: EINE Fläche, kein Backface möglich (iPad-sicher) */
 .flipcard {
   position: relative; border-radius: var(--r);
-  transform-style: preserve-3d;
-  transition: transform .55s cubic-bezier(.2,.75,.2,1), height .3s ease;
-  cursor: pointer; will-change: transform; -webkit-user-select: none; user-select: none;
+  cursor: pointer; transform-origin: center center;
+  will-change: transform; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  -webkit-user-select: none; user-select: none;
 }
-.flipcard.flip { transform: rotateY(180deg); }
-.face {
-  position: absolute; inset: 0;
-  -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  -webkit-transform: translateZ(0); transform: translateZ(0);
-}
-.face.back { -webkit-transform: rotateY(180deg) translateZ(0); transform: rotateY(180deg) translateZ(0); }
 
 /* shared card surface */
 .surface {
-  position: relative; height: 100%;
-  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  position: relative;
   background: var(--card);
   border: 1.5px solid var(--hair);
   border-radius: var(--r);
