@@ -638,3 +638,86 @@ const FLASHCARDS = [
     "a": "Bei **Insolvenz** des VU (§ 304 Abs. 1 S. 1 Nr. 4); im Übrigen Ermessen (Abs. 2, 3); **Teilwiderruf** vorrangig prüfen."
   }
 ];
+
+const EXAMQS = [
+  {
+    "id": 1,
+    "q": "Erläutern Sie den Unterschied zwischen materieller Staatsaufsicht und dem Publizitätssystem.",
+    "a": "Bei der **materiellen Staatsaufsicht** darf die Behörde auf gesetzlicher Grundlage **aktiv** durch belastende Maßnahmen auf die VU einwirken (so das deutsche System). Beim **Publizitätssystem** gewährleistet der Staat lediglich die **Veröffentlichung** von Unternehmensdaten; die eigentliche Kontrolle erfolgt durch das interessierte Publikum (Versicherte, Makler, Presse)."
+  },
+  {
+    "id": 2,
+    "q": "Welche Ziele verfolgt die Versicherungsaufsicht und welche zwei Grenzen sind zu beachten?",
+    "a": "Ziele: **Schutz der Belange der Versicherten** (§ 294 II 2 VAG, Schutztheorie/Solvenzaufsicht) und **Funktionsfähigkeit** des Versicherungswesens. Grenzen: **Subsidiaritätsprinzip** (§ 294 VIII – nur öffentliches Interesse, nicht rein individuelle Ansprüche) und **Optimierungsverbot** (nur ausreichende, nicht optimale Wahrung der Belange)."
+  },
+  {
+    "id": 3,
+    "q": "Nennen und erläutern Sie die drei Säulen von Solvency II.",
+    "a": "**Säule I (quantitativ):** Eigenmittelbedarf, versicherungstechnische Rückstellungen, Anlagevorschriften – stärker risikoabhängig. **Säule II (qualitativ):** Governance-System, insb. Risikomanagement (vgl. § 23 VAG), und aufsichtsrechtliches Überprüfungsverfahren. **Säule III (Publizität):** Veröffentlichungspflichten ggü. Aufsicht, VN und Markt → Markttransparenz/Marktdisziplin."
+  },
+  {
+    "id": 4,
+    "q": "Was versteht man unter dem Lamfalussy-Verfahren? Welche Ebene gilt unmittelbar?",
+    "a": "Vierstufiges EU-Rechtssetzungsverfahren: (1) Rahmenrichtlinie (RL 2009/138/EG, Omnibus II), (2) **delegierte Verordnung** der Kommission, (3) technische Durchführungsstandards/EIOPA-Leitlinien, (4) nationale Umsetzung (VAG). **Unmittelbar** geltend (ohne Umsetzung) ist **Ebene 2** (Verordnung)."
+  },
+  {
+    "id": 5,
+    "q": "Definieren Sie das Versicherungsgeschäft und grenzen Sie es vom „Rundum-sorglos-Paket“ bzw. von einem e.V. ohne Rechtsanspruch ab.",
+    "a": "**VG:** entgeltliche Leistung für ein **ungewisses Ereignis**, **Risikoverteilung auf eine Vielzahl** gleichartig Bedrohter, Kalkulation nach dem **Gesetz der großen Zahl**, **Rechtsanspruch** auf die Leistung. Das **„Rundum-sorglos-Paket“** erfüllt diese Merkmale (keine Nebenabrede, unabhängig vom Gerätekauf) → **aufsichtspflichtiges VG**. Beim **e.V.** fehlt der **Rechtsanspruch** (wirksame Einschränkung, §§ 305c, 242 BGB) → **kein VG**, BaFin nicht zuständig."
+  },
+  {
+    "id": 6,
+    "q": "Wann darf die Aufsicht gegen unwirksame AVB-Klauseln vorgehen? (mit Beispiel)",
+    "a": "Seit 1994 sind AVB grds. genehmigungsfrei; Eingriff nur über die **Missstandskontrolle** (§ 298) und nur bei Betroffenheit der **Gesamtheit** der Versicherten (**Subsidiaritätsprinzip**, § 294 VIII). **Beispiel:** Erklärt der BGH eine GDV-Musterklausel nach § 307 I BGB für unwirksam, kann die BaFin per Rundschreiben/Allgemeinverfügung die Anpassung verlangen."
+  },
+  {
+    "id": 7,
+    "q": "Welche Erlaubnisvoraussetzungen prüft die BaFin bei der Zulassung eines VU? (Überblick)",
+    "a": "Zulässige **Rechtsform** (§ 8 II), geeignete/zuverlässige **Geschäftsleiter** (§ 24, Vier-Augen-Prinzip § 188 I) und **Aufsichtsrat** (Sachkunde), **Geschäftsplan** (§ 9), zuverlässige Inhaber **bedeutender Beteiligungen** (§ 7 Nr. 3), ausreichende **Eigenmittel** (§§ 89, 214) sowie ordnungsgemäße **Geschäftsorganisation/Compliance/Risikomanagement** (§§ 23, 26 ff.). Versagung nur nach § 11 (keine Bedarfsprüfung, Abs. 3)."
+  },
+  {
+    "id": 8,
+    "q": "Erläutern Sie die Spartentrennung und ihren Zweck.",
+    "a": "Nach **§ 8 IV VAG** dürfen die **Lebensversicherung** und die **substitutive Krankenversicherung** jeweils nur getrennt betrieben werden. Zweck: Schutz dieser Sparten vor den Risiken aleatorischer Versicherungen und Sicherung der **Überschussbeteiligung**. Bei der Rechtsschutzversicherung genügt eine **organisatorische** Trennung (§ 164)."
+  },
+  {
+    "id": 9,
+    "q": "Was ist der Streit um die „allgemeine Missstandsaufsicht“ und wie ist er heute zu lösen?",
+    "a": "Fraglich war, ob die BaFin auch **ohne Rechtsverstoß** (allein bei unzureichender Wahrung der Belange) einschreiten darf. Mit der **Vollharmonisierung** durch Solvency II ist dies erledigt: **Art. 34 I RL** knüpft Eingriffe ausschließlich an die (drohende) Verletzung verbindlicher Rechts-/Verwaltungsvorschriften → nur noch **Legalitätskontrolle**."
+  },
+  {
+    "id": 10,
+    "q": "Nennen Sie die wichtigsten speziellen Maßnahmen der laufenden Aufsicht (mit Normen) in der Reihenfolge ihrer Eingriffsintensität.",
+    "a": "Zwangsweise **Geschäftsplanänderung** (§ 300), **Solvabilitäts-/Sanierungs-/Finanzierungsplan** (§§ 134–137), **Sonderbeauftragter** (§ 307), **Abberufung** von Geschäftsleitern/AR (§ 303), **Widerruf** der Erlaubnis (§ 304, ultima ratio), **Untersagung** unerlaubter Geschäfte (§ 308). Subsidiär die **Generalklausel** (§ 298 I). Grenze stets: **Verhältnismäßigkeit**."
+  },
+  {
+    "id": 11,
+    "q": "Beschreiben Sie Rechtsstellung und Grenzen des Sonderbeauftragten (§ 307 VAG).",
+    "a": "Die BaFin überträgt **Befugnisse eines Organs** auf den Sonderbeauftragten; das Organ ruht insoweit, bleibt aber bestehen. Er muss die **Qualifikation** nach § 24 erfüllen. Die BaFin hat ihm gegenüber **keine Weisungsbefugnis**; er unterliegt derselben Aufsicht wie das ersetzte Organ. **Kosten/Vergütung** trägt das VU (§ 307 III); seine Fahrlässigkeitshaftung ist **summenmäßig beschränkt** (§ 307 IV). Als milderes Mittel ggü. der Abberufung zu prüfen."
+  },
+  {
+    "id": 12,
+    "q": "Wie ist die Aufsicht über den Versicherungsvertrieb in Deutschland verteilt?",
+    "a": "Die **BaFin** beaufsichtigt die **Vertriebsaktivitäten der Versicherer** (§§ 23, 26, 48 ff. VAG), Vermittler nur **mittelbar**. Die **Erlaubnis** und unmittelbare Aufsicht über Vermittler liegt bei den **IHKs** (§ 34d GewO); **Sachkunde/Weiterbildung** in der VersVermV; Arbeitsteilung IHK/Gewerbeämter im Landesrecht; **Ordnungswidrigkeiten** ausschließlich bei Landesbehörden; zivilrechtlich gilt das **VVG**."
+  },
+  {
+    "id": 13,
+    "q": "Unterscheiden Sie Versicherungsvertreter, Versicherungsmakler und Versicherungsberater.",
+    "a": "**Vertreter:** vom **VU beauftragt**, vermittelt gewerbsmäßig (§ 59 VVG). **Makler:** für den **Kunden** tätig, **nicht** vom Versicherer beauftragt, ausschließlich im Kundeninteresse. **Berater:** **kein** Vermittler (§ 59 IV VVG), eigene IHK-Erlaubnis, kein wirtschaftlicher Vorteil vom Versicherer."
+  },
+  {
+    "id": 14,
+    "q": "In welchen Fällen ist ein Vermittler von der Erlaubnispflicht befreit? (mit Beispielen)",
+    "a": "**Produktakzessorische** Vermittler (§ 34d VI – z. B. Kfz-Handel), **gebundene** Vermittler (§ 34d VII, vgl. § 48 VAG), **Annexvermittler** (§ 34d VIII – z. B. Garantieversicherung im Elektronikhandel; Prämiengrenzen 600 €/200 €) sowie bestimmte Bausparkassen-/Restschuld-Fälle (≤ 500 €)."
+  },
+  {
+    "id": 15,
+    "q": "Welche vertriebsbezogenen Pflichten der Versicherer überwacht die BaFin? (Normen)",
+    "a": "**§ 48 VAG** (Zusammenarbeit nur mit qualifizierten/zuverlässigen Vermittlern), **§ 48a VAG** (Vertriebsvergütung/Interessenkonflikte), **§ 23 Abs. 1a ff. VAG** (Produktfreigabeverfahren/Zielmarkt), **§ 26 VAG** (Risikomanagement inkl. Vertriebsrisiken). Konkretisierung: Vertriebsrundschreiben 11/2018, Merkblatt 01/2023."
+  },
+  {
+    "id": 16,
+    "q": "Wann greift die BaFin Beschwerden von Vermittlern auf?",
+    "a": "Grundsätzlich **nicht** bei reinen Streitigkeiten zwischen Vermittler und Versicherer/anderen Vermittlern (kein gesetzlicher Auftrag). Sie greift aber ein, wenn **zugleich Kundeninteressen** betroffen sind – z. B. Verweigerung der **Makler-Korrespondenz** (BGH-Nebenpflicht) oder Beeinträchtigung **kollektiver** Kundeninteressen bei Abwerbung/„Umdeckung“."
+  }
+];
