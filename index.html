@@ -48,34 +48,30 @@
 
     <div class="tools">
       <button class="btn ghost" id="shuffle" type="button">⤨ Mischen</button>
-      <button class="btn ghost" id="onlyUnknown" type="button" aria-pressed="true">Alle zeigen</button>
+      <button class="btn ghost" id="onlyUnknown" type="button" aria-pressed="false">Nur unbekannte</button>
       <button class="btn ghost" id="reset" type="button">Zurücksetzen</button>
     </div>
 
-    <div class="board">
-      <section class="stage" id="stage" aria-live="polite"></section>
-
-      <div class="dock">
-        <div class="dock-inner">
-          <div class="row">
-            <button class="btn square" id="prev" type="button" aria-label="Zurück">←</button>
-            <button class="btn primary grow" id="flip" type="button">Lösung zeigen</button>
-            <button class="btn square" id="next" type="button" aria-label="Weiter">→</button>
-          </div>
-          <div class="row rates">
-            <button class="btn rate r-again" id="r-again" type="button"><span class="t">Nochmal</span><small id="iv-again">–</small></button>
-            <button class="btn rate r-hard"  id="r-hard"  type="button"><span class="t">Schwer</span><small id="iv-hard">–</small></button>
-            <button class="btn rate r-good"  id="r-good"  type="button"><span class="t">Gut</span><small id="iv-good">–</small></button>
-            <button class="btn rate r-easy"  id="r-easy"  type="button"><span class="t">Einfach</span><small id="iv-easy">–</small></button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <section class="stage" id="stage" aria-live="polite"></section>
 
     <p class="foot">
-      <b>Leertaste</b> aufdecken · <b>← →</b> blättern · <b>1</b> Nochmal · <b>2</b> Schwer · <b>3</b> Gut · <b>4</b> Einfach
+      <b>Leertaste</b> aufdecken · <b>← →</b> blättern (oder wischen) · <b>1</b> Nochmal · <b>2</b> Gewusst · <b>S</b> Mischen
     </p>
   </main>
+
+  <div class="dock">
+    <div class="dock-inner">
+      <div class="row">
+        <button class="btn square" id="prev" type="button" aria-label="Zurück">←</button>
+        <button class="btn primary grow" id="flip" type="button">Lösung zeigen</button>
+        <button class="btn square" id="next" type="button" aria-label="Weiter">→</button>
+      </div>
+      <div class="row">
+        <button class="btn again grow" id="again" type="button">↻ Nochmal</button>
+        <button class="btn good grow" id="good" type="button">✓ Gewusst</button>
+      </div>
+    </div>
+  </div>
 
   <script src="cards.js"></script>
   <script src="app.js"></script>

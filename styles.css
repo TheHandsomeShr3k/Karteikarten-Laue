@@ -68,9 +68,7 @@ body {
 .app {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 16px) clamp(14px, 4vw, 24px) calc(env(safe-area-inset-bottom) + 18px);
-  display: flex; flex-direction: column;
-  min-height: 100vh; min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 16px) clamp(14px, 4vw, 24px) 18px;
 }
 
 /* ---------- Header ---------- */
@@ -157,13 +155,7 @@ body {
 .counter b { color: var(--ink); }
 
 /* ---------- Card ---------- */
-/* Karte + Bedienleiste als zentrierte Gruppe */
-.board {
-  flex: 1 1 auto; min-height: 0;
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 16px; padding: 6px 0;
-}
-.stage { perspective: 1600px; }
+.stage { perspective: 1600px; min-height: 230px; }
 
 /* learn-mode card: EINE Fläche, kein Backface möglich (iPad-sicher) */
 .flipcard {
@@ -175,7 +167,7 @@ body {
 
 /* shared card surface */
 .surface {
-  position: relative; min-height: 200px;
+  position: relative;
   background: var(--card);
   border: 1.5px solid var(--hair);
   border-radius: var(--r);
@@ -283,8 +275,15 @@ kbd {
 .done .row { justify-content: center; flex-wrap: wrap; }
 
 /* ---------- Dock (sticky bottom controls) ---------- */
-.dock { margin: 0; padding: 0; }
-.dock-inner { width: 100%; max-width: var(--maxw); margin: 0 auto; display: grid; gap: 10px; }
+.dock {
+  position: sticky; bottom: 0; z-index: 20;
+  margin: 8px 0 0;
+  padding: 12px clamp(14px,4vw,24px) calc(env(safe-area-inset-bottom) + 12px);
+  background: linear-gradient(to top, var(--paper) 62%, rgba(241,236,225,0));
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .dock { background: linear-gradient(to top, var(--paper) 62%, rgba(15,20,27,0)); }
+.dock-inner { max-width: var(--maxw); margin: 0 auto; display: grid; gap: 10px; }
 .row { display: flex; gap: 9px; }
 .row.center { justify-content: center; }
 
@@ -324,6 +323,7 @@ kbd {
   .btn.square { width: 48px; min-height: 50px; }
   .foot { display: none; }
 }
+@media (min-width: 740px) { .stage { min-height: 260px; } }
 
 @media (prefers-reduced-motion: reduce) {
   .flipcard, .progress > i, .btn, .icon-btn { transition: none; }
@@ -342,11 +342,13 @@ kbd {
   .seg button { font-size: 15px; padding: 10px 18px; min-height: 42px; }
   .chip { font-size: 13px; padding: 9px 15px; min-height: 40px; }
   .counter { font-size: 14px; }
-  .surface { padding: 40px 46px; min-height: 250px; }
+  .stage { min-height: 300px; }
+  .surface { padding: 40px 46px; }
   .meta { font-size: 12px; margin-bottom: 18px; } .role { font-size: 11.5px; }
   .q { font-size: 32px; line-height: 1.3; } .a { font-size: 19px; line-height: 1.66; } .hint { font-size: 13px; }
   .exam-field { font-size: 16.5px; min-height: 130px; } .reveal .txt { font-size: 16.5px; } .done h2 { font-size: 30px; }
   .btn { font-size: 16.5px; min-height: 54px; padding: 14px 18px; } .btn.square { width: 58px; } .btn.ghost { font-size: 13.5px; min-height: 42px; }
+  .dock { padding-top: 14px; }
 }
 @media (min-width: 1200px) {
   :root { --maxw: 1060px; }
@@ -355,11 +357,12 @@ kbd {
   .seg button { font-size: 16px; padding: 11px 20px; min-height: 46px; }
   .chip { font-size: 14px; padding: 10px 16px; min-height: 42px; }
   .counter { font-size: 15px; }
-  .surface { padding: 48px 54px; min-height: 290px; }
+  .surface { padding: 48px 54px; }
   .q { font-size: 39px; } .a { font-size: 21px; } .hint { font-size: 14px; }
   .reveal .txt { font-size: 18px; } .exam-field { font-size: 17.5px; min-height: 150px; }
   .btn { font-size: 18px; min-height: 60px; } .btn.square { width: 66px; font-size: 22px; }
   .btn.ghost { font-size: 14.5px; min-height: 46px; }
+  .stage { min-height: 350px; }
 }
 @media (min-width: 1600px) {
   :root { --maxw: 1240px; }
@@ -367,88 +370,20 @@ kbd {
   .brand h1 { font-size: 35px; } .sigil { font-size: 68px; }
   .seg button { font-size: 17px; } .chip { font-size: 15px; }
   .counter { font-size: 16px; }
-  .surface { padding: 56px 64px; min-height: 330px; }
+  .surface { padding: 56px 64px; }
   .q { font-size: 45px; } .a { font-size: 23px; }
   .reveal .txt { font-size: 19px; }
   .btn { font-size: 19px; min-height: 64px; } .btn.square { width: 72px; }
+  .stage { min-height: 400px; }
 }
 @media (min-width: 2000px) {
   :root { --maxw: 1500px; }
   body { font-size: 22px; }
   .brand h1 { font-size: 40px; } .sigil { font-size: 78px; }
   .q { font-size: 52px; } .a { font-size: 25px; }
-  .surface { padding: 64px 72px; min-height: 380px; }
+  .surface { padding: 64px 72px; }
   .btn { font-size: 21px; min-height: 70px; } .btn.square { width: 80px; font-size: 26px; }
   .seg button { font-size: 18px; } .chip { font-size: 16px; }
   .counter { font-size: 17px; }
-}
-
-/* =========================================================
-   Spaced Repetition (Anki-Stil): 4 Bewertungs-Buttons,
-   Intervall-Vorschau, Status-Chip, Pause-Panel
-   ========================================================= */
-:root {
-  --r-again: #b5413c; --r-again-bg: #f6e2e0;
-  --r-hard:  #b9641f; --r-hard-bg:  #f6e8d7;
-  --r-good:  #3f6fb0; --r-good-bg:  #e4ecf6;
-  --r-easy:  #2c8a68; --r-easy-bg:  #e4f1ea;
-}
-[data-theme="dark"] {
-  --r-again-bg: #34201e; --r-hard-bg: #2f2316; --r-good-bg: #1d2735; --r-easy-bg: #15302a;
-}
-
-.rates { gap: 7px; }
-.btn.rate {
-  flex: 1 1 0; min-width: 0;
-  flex-direction: column; gap: 2px;
-  padding: 9px 4px; min-height: 56px;
-  line-height: 1.15;
-}
-.btn.rate .t { font-size: 13.5px; font-weight: 700; }
-.btn.rate small {
-  font-family: var(--font-mono); font-size: 10.5px; font-weight: 400;
-  opacity: .8; white-space: nowrap;
-}
-.btn.r-again { border-color: var(--r-again); color: var(--r-again); background: var(--r-again-bg); }
-.btn.r-hard  { border-color: var(--r-hard);  color: var(--r-hard);  background: var(--r-hard-bg); }
-.btn.r-good  { border-color: var(--r-good);  color: var(--r-good);  background: var(--r-good-bg); }
-.btn.r-easy  { border-color: var(--r-easy);  color: var(--r-easy);  background: var(--r-easy-bg); }
-@media (hover:hover) {
-  .btn.r-again:hover:not(:disabled) { background: var(--r-again); color: #fff; }
-  .btn.r-hard:hover:not(:disabled)  { background: var(--r-hard);  color: #fff; }
-  .btn.r-good:hover:not(:disabled)  { background: var(--r-good);  color: #fff; }
-  .btn.r-easy:hover:not(:disabled)  { background: var(--r-easy);  color: #fff; }
-}
-
-/* Status-Chip auf der Karte (neu / Intervall / fällig) */
-.srs-chip {
-  align-self: flex-start; margin-bottom: 10px;
-  font-family: var(--font-mono); font-size: 10.5px;
-  padding: 2px 9px; border-radius: 999px;
-  border: 1px solid var(--hair); color: var(--muted); background: var(--paper);
-  position: relative; z-index: 1;
-}
-.srs-chip.due  { border-color: var(--r-hard); color: var(--r-hard); background: var(--r-hard-bg); }
-.srs-chip.new  { border-color: var(--r-good); color: var(--r-good); background: var(--r-good-bg); }
-.srs-chip.ok   { border-color: var(--r-easy); color: var(--r-easy); background: var(--r-easy-bg); }
-
-/* Pause-Panel Countdown */
-.done .count {
-  font-family: var(--font-mono); font-size: 26px; color: var(--ink);
-  margin: 4px 0 18px;
-}
-
-@media (min-width: 820px) {
-  .btn.rate { min-height: 62px; }
-  .btn.rate .t { font-size: 15px; }
-  .btn.rate small { font-size: 11.5px; }
-}
-@media (min-width: 1200px) {
-  .btn.rate { min-height: 68px; }
-  .btn.rate .t { font-size: 16.5px; }
-  .btn.rate small { font-size: 12.5px; }
-}
-@media (max-width: 360px) {
-  .btn.rate .t { font-size: 12px; }
-  .btn.rate small { font-size: 9.5px; }
+  .stage { min-height: 460px; }
 }
