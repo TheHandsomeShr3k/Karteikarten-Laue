@@ -329,45 +329,61 @@ kbd {
   .flipcard, .progress > i, .btn, .icon-btn { transition: none; }
 }
 
+
 /* =========================================================
-   Desktop-Skalierung (Edge/Chrome/Firefox auf großen Bildschirmen)
-   Mobil/Tablet bleibt unverändert; ab hier breiter & größer.
+   Desktop- & 4K-Skalierung (Edge/Chrome/Firefox)
+   Mehrere Stufen: breitere Spalte + größere Schrift/Bedienung.
+   Mobil/Tablet bleibt unverändert.
    ========================================================= */
 @media (min-width: 820px) {
-  :root { --maxw: 840px; }
+  :root { --maxw: 880px; }
   body { font-size: 17px; }
-
-  .brand h1 { font-size: 26px; }
-  .sigil    { font-size: 52px; }
-
+  .brand h1 { font-size: 27px; } .sigil { font-size: 54px; }
   .seg button { font-size: 15px; padding: 10px 18px; min-height: 42px; }
-  .chip       { font-size: 13px; padding: 9px 15px; min-height: 40px; }
-  .counter    { font-size: 14px; }
-
-  .stage   { min-height: 300px; }
-  .surface { padding: 40px 44px; }
-  .meta    { font-size: 12px; margin-bottom: 18px; }
-  .role    { font-size: 11.5px; }
-  .q       { font-size: 31px; line-height: 1.3; }
-  .a       { font-size: 19px; line-height: 1.66; }
-  .hint    { font-size: 13px; }
-
-  .exam-field    { font-size: 16.5px; min-height: 130px; }
-  .reveal .txt   { font-size: 16.5px; }
-  .done h2       { font-size: 30px; }
-
-  .btn        { font-size: 16.5px; min-height: 54px; padding: 14px 18px; }
-  .btn.square { width: 58px; }
-  .btn.ghost  { font-size: 13.5px; min-height: 42px; }
-
-  /* etwas Abstand der fixen Leiste vom Inhalt auf Desktop */
+  .chip { font-size: 13px; padding: 9px 15px; min-height: 40px; }
+  .counter { font-size: 14px; }
+  .stage { min-height: 300px; }
+  .surface { padding: 40px 46px; }
+  .meta { font-size: 12px; margin-bottom: 18px; } .role { font-size: 11.5px; }
+  .q { font-size: 32px; line-height: 1.3; } .a { font-size: 19px; line-height: 1.66; } .hint { font-size: 13px; }
+  .exam-field { font-size: 16.5px; min-height: 130px; } .reveal .txt { font-size: 16.5px; } .done h2 { font-size: 30px; }
+  .btn { font-size: 16.5px; min-height: 54px; padding: 14px 18px; } .btn.square { width: 58px; } .btn.ghost { font-size: 13.5px; min-height: 42px; }
   .dock { padding-top: 14px; }
 }
-
 @media (min-width: 1200px) {
-  :root { --maxw: 900px; }
-  body  { font-size: 18px; }
-  .q    { font-size: 34px; }
-  .a    { font-size: 20px; }
-  .brand h1 { font-size: 28px; }
+  :root { --maxw: 1060px; }
+  body { font-size: 18.5px; }
+  .brand h1 { font-size: 31px; } .sigil { font-size: 60px; }
+  .seg button { font-size: 16px; padding: 11px 20px; min-height: 46px; }
+  .chip { font-size: 14px; padding: 10px 16px; min-height: 42px; }
+  .counter { font-size: 15px; }
+  .surface { padding: 48px 54px; }
+  .q { font-size: 39px; } .a { font-size: 21px; } .hint { font-size: 14px; }
+  .reveal .txt { font-size: 18px; } .exam-field { font-size: 17.5px; min-height: 150px; }
+  .btn { font-size: 18px; min-height: 60px; } .btn.square { width: 66px; font-size: 22px; }
+  .btn.ghost { font-size: 14.5px; min-height: 46px; }
+  .stage { min-height: 350px; }
+}
+@media (min-width: 1600px) {
+  :root { --maxw: 1240px; }
+  body { font-size: 20px; }
+  .brand h1 { font-size: 35px; } .sigil { font-size: 68px; }
+  .seg button { font-size: 17px; } .chip { font-size: 15px; }
+  .counter { font-size: 16px; }
+  .surface { padding: 56px 64px; }
+  .q { font-size: 45px; } .a { font-size: 23px; }
+  .reveal .txt { font-size: 19px; }
+  .btn { font-size: 19px; min-height: 64px; } .btn.square { width: 72px; }
+  .stage { min-height: 400px; }
+}
+@media (min-width: 2000px) {
+  :root { --maxw: 1500px; }
+  body { font-size: 22px; }
+  .brand h1 { font-size: 40px; } .sigil { font-size: 78px; }
+  .q { font-size: 52px; } .a { font-size: 25px; }
+  .surface { padding: 64px 72px; }
+  .btn { font-size: 21px; min-height: 70px; } .btn.square { width: 80px; font-size: 26px; }
+  .seg button { font-size: 18px; } .chip { font-size: 16px; }
+  .counter { font-size: 17px; }
+  .stage { min-height: 460px; }
 }
